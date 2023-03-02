@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["filteredRelationCount"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model repositories {
+  id                  Int                   @id @default(autoincrement())
+  link                String                @unique @db.VarChar(255)
+  section             sections?             @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  sectionId           Int?
+  repositoriesToUsers repositoriesToUsers[]
+}
+
+model sections {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(255)
+  organization    organizations     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId  Int
+  sectionsToUsers sectionsToUsers[]
+  urlCodes        urlCodes[]
+  repositories    repositories[]
+}
+
+model organizations {
+  id                   Int                    @id @default(autoincrement())
+  name                 String?                @unique @db.VarChar(255)
+  githubName           String                 @unique @db.VarChar(255)
+  link                 String                 @unique @db.VarChar(255)
+  sections             sections[]
+  organizationsToUsers organizationsToUsers[]
+}
+
+model repositoriesToUsers {
+  id           Int          @id @default(autoincrement())
+  repository   repositories @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  user         users        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repositoryId Int
+  userId       String
+}
+
+model sectionsToUsers {
+  id        Int      @id @default(autoincrement())
+  section   sections @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sectionId Int
+  userId    String
+}
+
+model organizationsToUsers {
+  id             Int           @id @default(autoincrement())
+  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           users         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId Int
+  userId         String
+}
+
+model users {
+  id                   String                 @id @default(uuid())
+  name                 String?                @db.VarChar(50)
+  surname              String?                @db.VarChar(50)
+  githubLogin          String                 @unique @db.VarChar(255)
+  studentEmail         String?                @unique @db.VarChar(255)
+  repositoriesToUsers  repositoriesToUsers[]
+  sectionsToUsers      sectionsToUsers[]
+  organizationsToUsers organizationsToUsers[]
+  usersToRoles         usersToRoles[]
+  urlCodesToUsers      urlCodesToUsers[]
+}
+
+model roles {
+  id           Int            @id @default(autoincrement())
+  role         String         @unique @db.VarChar(255)
+  usersToRoles usersToRoles[]
+}
+
+model usersToRoles {
+  id     Int    @id @default(autoincrement())
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   roles  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  userId String
+  roleId Int
+}
+
+model urlCodes {
+  id              String            @id @default(uuid())
+  expireDate      DateTime          @db.Timestamptz()
+  section         sections          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  urlCodesToUsers urlCodesToUsers[]
+  sectionId       Int
+}
+
+model urlCodesToUsers {
+  id        Int      @id @default(autoincrement())
+  urlCode   urlCodes @relation(fields: [urlCodeId], references: [id], onDelete: Cascade)
+  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  urlCodeId String
+  userId    String
+}

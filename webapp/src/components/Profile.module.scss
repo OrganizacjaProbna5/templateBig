@@ -1,0 +1,22 @@
+.mainContainer{
+    width: calc(80vw + 40px);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.contentContainer{
+    display: inline-flex;
+    justify-content: center;
+    width: 100%;
+    padding-top: 25px;
+}
+
+.content{
+    padding-right: 75px;
+    min-width: 300px;
+}
+
+.contentList{
+    max-height: calc(80vh - 75px - 10px - 42.25px - 50px);
+    overflow: auto;
+}
